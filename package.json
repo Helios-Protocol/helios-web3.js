@@ -1,0 +1,18 @@
+{
+  "name": "helios-web3",
+  "version": "1.0.0",
+  "description": "Web3.js extended for use with heliosprotocol",
+  "main": "helios-web3.js",
+  "dependencies": {
+    "browserify": "^16.2.3",
+    "eth-lib": "0.2.7",
+    "merkle-patricia-tree": "^2.3.2",
+    "web3": "^1.0.0-beta.37"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tommy Mckinnon",
+  "license": "ISC"
+}

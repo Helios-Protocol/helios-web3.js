@@ -1,0 +1,55 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HLS Wallet Prototype</title>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+</head>
+
+<body>
+    <script src="js/helios_web3.js"></script>
+
+    <script src="js/main.js"></script>
+
+    <div id="loaded_wallet_status" >
+        no wallet loaded
+
+    </div>
+
+    <div id="current_status">
+
+    </div>
+    <form id="load_wallet_form">
+        Private key: <input id='input_private_key' name='private_key' type="text" value = '0x336c108130731feb4b737dbcebd60a5056cf3bc35e946d016dc3fd1727b09b78'>
+        <br>
+        <input type="submit" value="Load">
+    </form>
+
+    <form id="add_transaction_form">
+        Amount: <input id='input_amount' name='amount' type="text" value = '1'>
+        <br>
+        To: <input id='input_to' name='to' type="text" value = '0x0d1630cb77c00d95f7fa32bccfe80043639681be'>
+        <br>
+        Gas Price: <input id='input_gas_price' name='gas_price' type="text" value = '1'>
+        <br>
+        Total Gas: <input id='input_total_gas' name='total_gas' type="text" value = '800000'>
+        <br>
+        <input type="submit" value="Add transaction to block">
+    </form>
+
+    <div id="receive_transaction_list"></div>
+    <div id="send_transaction_list"></div>
+
+    <form id="send_block">
+        <input type="submit" value="Send block">
+    </form>
+    <div id="refresh_transactions">Refresh transactions</div>
+    <br><br>
+    Transactions
+    <div id="transactions"></div>
+
+</body>
+</html>
