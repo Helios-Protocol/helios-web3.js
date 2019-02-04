@@ -1,12 +1,18 @@
-var API_address = "ws://127.0.0.1:30304";
+var available_nodes = [
+    "ws://142.58.49.25:30304"
+]
+//"ws://127.0.0.1:30304",
 //var API_address = "ws://142.58.49.25:30304";
 var sending_account = null
 var pending_send_transactions = []
 
 $( document ).ready(function() {
-
-    web3.setProvider(new web3.providers.WebsocketProvider(API_address));
+    setInterval(network_connection_maintainer_loop, 1000);
     hls = web3.hls;
+
+
+
+
 
     $('#load_wallet_form').submit(function (e){
         e.preventDefault();
@@ -68,6 +74,23 @@ $( document ).ready(function() {
 
     });
 
+    $('#receive_incoming_transactions').click(function (e){
+
+        if(sending_account == null){
+            set_status('Need to load a wallet first')
+            return
+        }
+
+        web3.hls.sendRewardBlock(sending_account.address)
+        .then(function(){
+            set_status("Block successfully sent");
+        })
+
+        clear_vars();
+
+
+    });
+
     $('#refresh_transactions').click(function (e){
         if(sending_account == null){
             set_status('Need to load a wallet first')
@@ -77,42 +100,104 @@ $( document ).ready(function() {
         refresh_transactions();
     });
 
-    setInterval(refresh_transactions, 1000);
+    setInterval(refresh_loop, 1000);
+
 
 });
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function network_connection_maintainer_loop(){
+    if(web3.currentProvider == null){
+        set_connection_status('Connecting to network.');
+        connect_to_first_available_node()
+    }
+
+    if(web3.currentProvider.connected){
+        var url = web3.currentProvider.connection.url;
+        set_connection_status('Connected to node '+url);
+    } else{
+        set_connection_status('Connection to network failed. Retrying connection.');
+        if(connect_to_first_available_node()){
+            var url = web3.currentProvider.connection.url;
+            set_connection_status('Connected to node '+url);
+        }
+    }
+
+}
+
+async function connect_to_first_available_node(){
+    for(i=0;i<available_nodes.length;i++) {
+        API_address = available_nodes[i];
+        if(web3.currentProvider == null || !web3.currentProvider.connected) {
+            web3.setProvider(new web3.providers.WebsocketProvider(API_address));
+            await sleep(100);
+        }else{
+            return true;
+        }
+    }
+    return false
+}
+
+function refresh_loop(){
+    if(sending_account != null){
+        refresh_transactions()
+    }
+
+}
 function refresh_transactions(){
     if(sending_account == null){
         set_status('Need to load a wallet first')
         return
     }
 
-    var now = new Date().getTime() / 1000;
-    get_all_transactions(now, 0)
-    .then(function(txs){
-        $('#transactions').html('<table class="transaction_list_table">');
-        $('#transactions').append("<tr><th>Date</th><th>Description</th><th>Value</th><th>Balance</th><th>Block Number</th>")
-        if(txs.length > 0){
-            var prev_block_number = null
-            for(i=0; i< txs.length; i++){
-                var tx = txs[i];
-                var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-                d.setUTCSeconds(tx[0]);
+    var from_month = $('select.from_month').children("option:selected").val();
+    var from_year = $('select.from_year').children("option:selected").val();
+    var to_month = $('select.to_month').children("option:selected").val();
+    var to_year = $('select.to_year').children("option:selected").val();
 
-                if(prev_block_number == null || prev_block_number != tx[5]){
-                    $('#transactions').append("<tr><td>"+d.toLocaleString()+"</td><td>"+tx[1]+"</td><td>"+tx[2]+"</td><td>"+tx[4]+"</td><td>"+tx[5]+"</td></tr>");
-                }else{
-                    $('#transactions').append("<tr><td>"+d.toLocaleString()+"</td><td>"+tx[1]+"</td><td>"+tx[2]+"</td><td></td><td>"+tx[5]+"</td></tr>");
+
+
+    var start_timestamp = new Date(from_year, from_month, 01).getTime() / 1000
+    var end_timestamp = new Date(to_year, to_month, 01).getTime() / 1000
+    console.log('test')
+    console.log(start_timestamp)
+    console.log(end_timestamp)
+
+    get_all_transactions(start_timestamp, end_timestamp)
+    .then(function(txs){
+        if(!txs){
+            $('#transactions').html("Connecting to server");
+        } else {
+
+            if (txs.length > 0) {
+                $('#transactions').html('<table class="transaction_list_table">');
+                $('#transactions').append("<tr><th>Date</th><th>Description</th><th>Amount</th><th>Gas cost</th><th>Balance</th><th>Block Number</th></tr>")
+                var prev_block_number = null
+                for (i = 0; i < txs.length; i++) {
+                    var tx = txs[i];
+                    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+                    d.setUTCSeconds(tx.timestamp);
+
+                    if (prev_block_number == null || prev_block_number != tx.block_number) {
+                        $('#transactions').append("<tr><td>" + d.toLocaleString() + "</td><td>" + tx.description + "</td><td>" + tx.value + "</td><td>" + tx.gas_cost + "</td><td>" + tx.balance + "</td><td>" + tx.block_number + "</td></tr>");
+                    } else {
+                        $('#transactions').append("<tr><td>" + d.toLocaleString() + "</td><td>" + tx.description + "</td><td>" + tx.value + "</td><td></td><td>" + tx.block_number + "</td></tr>");
+                    }
+                    prev_block_number = tx.block_number
                 }
-                prev_block_number = tx[5]
+                $('#transactions').append("</table>");
             }
         }
-        $('#transactions').append("</table>");
     });
 }
 
+
+
 // tx_type
-//returns a list of lists [block_timestamp, description, value (negative is send, positive is receive), from or to, final_block_balance, block_number]
+//returns a list of tx_info
 async function get_all_transactions(start_timestamp, end_timestamp){
     if (start_timestamp < end_timestamp){
         start_timestamp = [end_timestamp, end_timestamp = start_timestamp][0];
@@ -121,7 +206,7 @@ async function get_all_transactions(start_timestamp, end_timestamp){
     try{
         var start_block_number = await web3.hls.getBlockNumber(sending_account.address)
     }catch(err) {
-        return []
+        return false
     }
     var output = []
 
@@ -136,7 +221,8 @@ async function get_all_transactions(start_timestamp, end_timestamp){
         if(new_block.transactions.length > 0){
             for (j = 0; j < new_block.transactions.length; j++) {
                 var tx = new_block.transactions[j]
-                output.push([new_block.timestamp, "Send transaction", -1*tx.value, tx.to, new_block.accountBalance, new_block.number ])
+                output.push(new tx_info(new_block.timestamp, "Send transaction", -1*tx.value, -1*tx.gas*tx.gasPrice, tx.to, null, new_block.accountBalance, new_block.number))
+
             }
         }
         if(new_block.receiveTransactions.length > 0){
@@ -147,12 +233,11 @@ async function get_all_transactions(start_timestamp, end_timestamp){
                 } else {
                     var description = "Receive transaction"
                 }
-                output.push([new_block.timestamp, description, tx.value, tx.from, new_block.accountBalance, new_block.number])
+                output.push(new tx_info(new_block.timestamp, description, tx.value,0, null, tx.from, new_block.accountBalance, new_block.number))
             }
         }
-
-        output.push([new_block.timestamp, "Reward type 1", new_block.rewardBundle.rewardType1.amount, null, new_block.accountBalance, new_block.number])
-        output.push([new_block.timestamp ,"Reward type 2", new_block.rewardBundle.rewardType2.amount, null, new_block.accountBalance, new_block.number])
+        output.push(new tx_info(new_block.timestamp, "Reward type 1", new_block.rewardBundle.rewardType1.amount, 0, null, null, new_block.accountBalance, new_block.number))
+        output.push(new tx_info(new_block.timestamp, "Reward type 2", new_block.rewardBundle.rewardType2.amount, 0, null, null, new_block.accountBalance, new_block.number))
     }
     return output
 }
@@ -167,4 +252,7 @@ var clear_vars = function(include_account = false){
 
 var set_status = function(status){
     $('#current_status').text(status);
+}
+var set_connection_status = function(status){
+    $('#network_connection_status').text(status);
 }

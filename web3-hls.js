@@ -315,10 +315,31 @@ Hls.prototype.sendTransactions = function sendTransactions(txs) {
     }
 }
 
-////Override the sendSignedTransaction to make it compatible with helios
-//Hls.prototype.sendSignedTransaction = function sendSignedTransaction(tx, privateKey, callback) {
-//    console.log('gotem');
-//}
+//This sends a block containing all pending receive transactions including the reward block
+Hls.prototype.sendRewardBlock = function sendRewardBlock(from) {
+    var _this = this,
+        error = false,
+        result;
+
+
+    var account = getAccountFromWallet(from, _this.accounts);
+    if (account && account.privateKey) {
+
+        return Promise.all([
+            account.signBlock()
+        ]).then(function(args){
+            var signed_block = args[0];
+            return _this.sendRawBlock(signed_block.rawBlock);
+        });
+
+
+    } else {
+        error = new Error('Not implemented yet. You must use sendRewardBlock with a local wallet so that it can be signed here.');
+
+        return Promise.reject(error);
+    }
+}
+
 
 core.addProviders(Hls);
 
