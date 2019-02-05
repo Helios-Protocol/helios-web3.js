@@ -8,7 +8,11 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="js/helios_web3.js"></script>
     <script src="js/datastructures.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/visual.js"></script>
     <script src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" />
 
 
     <link rel="stylesheet" href="css/main.css">
@@ -43,9 +47,9 @@
                 <br>
                 To: <input id='input_to' name='to' type="text" value = '0x0d1630cb77c00d95f7fa32bccfe80043639681be'>
                 <br>
-                Gas Price: <input id='input_gas_price' name='gas_price' type="text" value = '1'>
+                Gas Price: <input id='input_gas_price' name='gas_price' type="number" value = '1' min='1'>
                 <br>
-                Total Gas: <input id='input_total_gas' name='total_gas' type="text" value = '800000'>
+                Total Gas: <input id='input_total_gas' name='total_gas' type="number" value = '800000'>
                 <br>
                 <input type="submit" value="Add transaction to block">
             </form>
@@ -105,6 +109,13 @@
             Transactions
             <div id="transactions">
             </div>
+
+            <br><br><br><br><br>
+            <div id="get_min_gas_price">Get Min Gas Price</div>
+            <div id="get_historical_min_gas_price">Get Historical Min Gas Price</div>
+            <div id="get_transaction_receipt">Get Transaction Receipt</div>
+
+            <div id="plot_div" style="width:800px; height: 500px;"></div>
         </div>
     </div>
 

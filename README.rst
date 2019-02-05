@@ -40,6 +40,10 @@ a chainAddress so that the node knows which chain the block lives on.
 "receiveTransactions"
 "rewardBundle"
 
+
+**example transactions**
+includes "gasUsed", unlike eth
+
 **example receiveTransactions**
 hash: "0xb52610ea9fefb6a2af025edc8e56d07c78d7446f1f0fe34005672ec3127ed965"
 isRefund: "0x0"
@@ -58,6 +62,15 @@ Same as web3.hls.getBlockNumber with the addition of chainAddress. chainAddress 
 **Returns**
 Same as web3.hls.getBlockNumber
 
+web3.hls.getHistoricalGasPrice([callback])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Returns**
+A list of [timestamp, gas_price] entries for as far back as the node saves.
+
+web3.hls.getTransactionReceipt(hash [, callback])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Same as with ethereum web3 except it returns 1 additional parameter:
+"is_receive"
 
 
 

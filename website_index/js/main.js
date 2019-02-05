@@ -1,10 +1,13 @@
 var available_nodes = [
+    "ws://127.0.0.1:30304",
     "ws://142.58.49.25:30304"
 ]
 //"ws://127.0.0.1:30304",
 //var API_address = "ws://142.58.49.25:30304";
 var sending_account = null
 var pending_send_transactions = []
+
+var testing_transactions = []
 
 $( document ).ready(function() {
     setInterval(network_connection_maintainer_loop, 1000);
@@ -100,19 +103,69 @@ $( document ).ready(function() {
         refresh_transactions();
     });
 
-    setInterval(refresh_loop, 1000);
+    $('#get_min_gas_price').click(function (e){
+        if(sending_account == null){
+            set_status('Need to load a wallet first')
+            return
+        }
+        web3.hls.getGasPrice()
+            .then(console.log)
+    });
 
+    $('#get_transaction_receipt').click(function (e){
+        if(sending_account == null){
+            set_status('Need to load a wallet first')
+            return
+        }
+        web3.hls.getBlockNumber(sending_account.address)
+            .then(function(args0){
+                web3.hls.getBlock(args0, sending_account.address, true)
+                    .then(function(args){
+                        if(args.transactions.length > 0) {
+                            web3.hls.getTransactionReceipt(args.transactions[0].hash)
+                                .then(console.log);
+                        }
+
+                        if(args.receiveTransactions.length > 0) {
+                            web3.hls.getTransactionReceipt(args.receiveTransactions[0].hash)
+                                .then(console.log);
+                        }
+
+
+                    });
+
+            })
+
+
+    });
+
+    $('#get_historical_min_gas_price').click(function (e){
+        if(sending_account == null){
+            set_status('Need to load a wallet first')
+            return
+        }
+        web3.hls.getHistoricalGasPrice()
+            .then(function(args){
+                div = document.getElementById("plot_div");
+                var csv_string = toCSV(args)
+                var g = new Dygraph(div, csv_string);
+            })
+    });
+
+    setInterval(refresh_loop, 1000);
+    init_min_gas_price();
 
 });
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+//
+// Loops
+//
 
-function network_connection_maintainer_loop(){
+async function network_connection_maintainer_loop(){
+    //console.log(web3.currentProvider);
     if(web3.currentProvider == null){
         set_connection_status('Connecting to network.');
-        connect_to_first_available_node()
+        await connect_to_first_available_node()
     }
 
     if(web3.currentProvider.connected){
@@ -120,7 +173,7 @@ function network_connection_maintainer_loop(){
         set_connection_status('Connected to node '+url);
     } else{
         set_connection_status('Connection to network failed. Retrying connection.');
-        if(connect_to_first_available_node()){
+        if(await connect_to_first_available_node()){
             var url = web3.currentProvider.connection.url;
             set_connection_status('Connected to node '+url);
         }
@@ -130,7 +183,7 @@ function network_connection_maintainer_loop(){
 
 async function connect_to_first_available_node(){
     for(i=0;i<available_nodes.length;i++) {
-        API_address = available_nodes[i];
+        var API_address = available_nodes[i];
         if(web3.currentProvider == null || !web3.currentProvider.connected) {
             web3.setProvider(new web3.providers.WebsocketProvider(API_address));
             await sleep(100);
@@ -147,6 +200,11 @@ function refresh_loop(){
     }
 
 }
+
+
+//
+// General functionality
+//
 function refresh_transactions(){
     if(sending_account == null){
         set_status('Need to load a wallet first')
@@ -158,13 +216,8 @@ function refresh_transactions(){
     var to_month = $('select.to_month').children("option:selected").val();
     var to_year = $('select.to_year').children("option:selected").val();
 
-
-
     var start_timestamp = new Date(from_year, from_month, 01).getTime() / 1000
     var end_timestamp = new Date(to_year, to_month, 01).getTime() / 1000
-    console.log('test')
-    console.log(start_timestamp)
-    console.log(end_timestamp)
 
     get_all_transactions(start_timestamp, end_timestamp)
     .then(function(txs){
@@ -174,7 +227,7 @@ function refresh_transactions(){
 
             if (txs.length > 0) {
                 $('#transactions').html('<table class="transaction_list_table">');
-                $('#transactions').append("<tr><th>Date</th><th>Description</th><th>Amount</th><th>Gas cost</th><th>Balance</th><th>Block Number</th></tr>")
+                $('#transactions').append("<tr><th>Date</th><th>Description</th><th>Amount</th><th>Fees</th><th>Balance</th><th>Block Number</th></tr>")
                 var prev_block_number = null
                 for (i = 0; i < txs.length; i++) {
                     var tx = txs[i];
@@ -196,7 +249,6 @@ function refresh_transactions(){
 
 
 
-// tx_type
 //returns a list of tx_info
 async function get_all_transactions(start_timestamp, end_timestamp){
     if (start_timestamp < end_timestamp){
@@ -221,7 +273,7 @@ async function get_all_transactions(start_timestamp, end_timestamp){
         if(new_block.transactions.length > 0){
             for (j = 0; j < new_block.transactions.length; j++) {
                 var tx = new_block.transactions[j]
-                output.push(new tx_info(new_block.timestamp, "Send transaction", -1*tx.value, -1*tx.gas*tx.gasPrice, tx.to, null, new_block.accountBalance, new_block.number))
+                output.push(new tx_info(new_block.timestamp, "Send transaction", -1*tx.value, -1*tx.gasUsed, tx.to, null, new_block.accountBalance, new_block.number))
 
             }
         }
@@ -233,7 +285,7 @@ async function get_all_transactions(start_timestamp, end_timestamp){
                 } else {
                     var description = "Receive transaction"
                 }
-                output.push(new tx_info(new_block.timestamp, description, tx.value,0, null, tx.from, new_block.accountBalance, new_block.number))
+                output.push(new tx_info(new_block.timestamp, description, tx.value,-1*tx.gasUsed, null, tx.from, new_block.accountBalance, new_block.number))
             }
         }
         output.push(new tx_info(new_block.timestamp, "Reward type 1", new_block.rewardBundle.rewardType1.amount, 0, null, null, new_block.accountBalance, new_block.number))
@@ -243,16 +295,17 @@ async function get_all_transactions(start_timestamp, end_timestamp){
 }
 
 
-var clear_vars = function(include_account = false){
-    if (include_account){
-        sending_account = null;
+function init_min_gas_price(){
+    if(web3.currentProvider == null || !web3.currentProvider.connected) {
+        //Not connected yet. Try again in a few seconds.
+        setTimeout(init_min_gas_price, 1000);
+    }else {
+        web3.hls.getGasPrice()
+            .then(function (min_gas_price) {
+                $('#input_gas_price').attr('value', min_gas_price + 1);
+                $('#input_gas_price').attr('min', min_gas_price);
+            });
     }
-    pending_send_transactions = [];
 }
 
-var set_status = function(status){
-    $('#current_status').text(status);
-}
-var set_connection_status = function(status){
-    $('#network_connection_status').text(status);
-}
+

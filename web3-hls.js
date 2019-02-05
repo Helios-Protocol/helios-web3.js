@@ -207,6 +207,24 @@ var Hls = function Hls() {
             params: 1,
             outputFormatter: utils.hexToNumber
         }),
+        new Method({
+            name: 'getGasPrice',
+            call: 'hls_getGasPrice',
+            params: 0,
+            outputFormatter: utils.hexToNumber
+        }),
+        new Method({
+            name: 'getHistoricalGasPrice',
+            call: 'hls_getHistoricalGasPrice',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
+        }),
+        new Method({
+            name: 'getTransactionReceipt',
+            call: 'hls_getTransactionReceipt',
+            params: 1,
+            outputFormatter: hls_formatter.outputTransactionReceiptFormatter
+        }),
 
     ];
 
