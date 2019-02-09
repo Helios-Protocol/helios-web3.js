@@ -225,6 +225,13 @@ var Hls = function Hls() {
             params: 1,
             outputFormatter: hls_formatter.outputTransactionReceiptFormatter
         }),
+        new Method({
+            name: 'getBalance',
+            call: 'hls_getBalance',
+            params: 2,
+            inputFormatter: [formatter.inputAddressFormatter, formatter.inputDefaultBlockNumberFormatter],
+            outputFormatter: formatter.outputBigNumberFormatter
+        }),
 
     ];
 
