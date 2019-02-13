@@ -9,4 +9,4 @@ npm install browserify web3@1.0.0-beta.37
 #npm install browserify ethereumjs-util buffer merkle-patricia-tree ethereumjs-wallet underscore
 
 create embeded browser file:
-browserify main.js -o website_index/js/helios_web3.js
+browserify export_for_website.js -o website_index/js/helios_web3.js

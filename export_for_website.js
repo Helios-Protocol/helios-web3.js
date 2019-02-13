@@ -1,4 +1,4 @@
-var Web3 = require('./helios-web3.js');
+var Web3 = require('./index.js');
 var web3 = new Web3();
 
 if (typeof window !== 'undefined') {

@@ -129,6 +129,7 @@ var Accounts = function Accounts() {
 
 
     this.wallet = new Wallet(this);
+    this.pendingTransactions = [];
 };
 
 Accounts.prototype._addAccountFunctions = function (account) {
@@ -163,6 +164,9 @@ Accounts.prototype.create = function create(entropy) {
 Accounts.prototype.privateKeyToAccount = function privateKeyToAccount(privateKey) {
     return this._addAccountFunctions(Account.fromPrivate(privateKey));
 };
+
+
+
 
 Accounts.prototype.signTransaction = function signTransaction(tx, privateKey, callback) {
     var _this = this,
