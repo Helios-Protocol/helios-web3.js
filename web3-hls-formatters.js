@@ -69,7 +69,7 @@ var outputRewardType2Formatter = function (reward){
     if (_.isArray(reward.proof)) {
         reward.proof = reward.proof.map(function(item) {
             if(!_.isString(item))
-                return formatter.outputRewardStakingScoreFormatter(item);
+                return outputRewardStakingScoreFormatter(item);
         });
     }
     return reward
