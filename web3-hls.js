@@ -232,6 +232,13 @@ var Hls = function Hls() {
             inputFormatter: [formatter.inputAddressFormatter, formatter.inputDefaultBlockNumberFormatter],
             outputFormatter: formatter.outputBigNumberFormatter
         }),
+        new Method({
+            name: 'getReceivableTransactions',
+            call: 'hls_getReceivableTransactions',
+            params: 1,
+            inputFormatter: [formatter.inputAddressFormatter],
+            outputFormatter: hls_formatter.outputReceiveTransactionFormatter
+        }),
 
     ];
 

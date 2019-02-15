@@ -47,6 +47,7 @@ var outputReceiveTransactionFormatter = function (tx){
     tx.txTypeId = utils.hexToNumber(tx.txTypeId);
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
     tx.isRefund = Boolean(parseInt(tx.isRefund));
+    tx.from = utils.toChecksumAddress(tx.from);
 
     return tx
 };
@@ -157,6 +158,7 @@ var outputTransactionReceiptFormatter = function (receipt){
 
     return receipt;
 };
+
 
 
 module.exports = {
