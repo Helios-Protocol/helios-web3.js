@@ -498,8 +498,9 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 var send_tx_root = args[0];
                 var receive_tx_root = args[1];
                 var reward_bundle_hash = args[2];
-                console.log('test')
-                console.log(reward_bundle_hash)
+                console.log('test');
+                console.log(reward_bundle_hash);
+                console.log(total_reward_amount);
                 var timestamp = Math.floor(Date.now() / 1000)
                 var header = {
                     chain_address: _this.privateKeyToAccount(privateKey).address,
@@ -552,7 +553,7 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
 
 };
 
-/* jshint ignore:start */
+
 Accounts.prototype.getRewardAmountFromEncodedRewardBundle = function getRewardAmountFromEncodedRewardBundle(encoded_reward_bundle) {
     var decoded_bundle = RLP.decode(encoded_reward_bundle);
     var type_1_amount = Bytes.toNumber(decoded_bundle[0][0]) || 0;

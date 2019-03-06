@@ -52,6 +52,7 @@ sendTransactionHash: "0xe5b564e507e45e24b789164aecb124f451ffc446c6f1c12a0a11ef06
 from: "0xdb4ca426d53b59f60370274ffb19f2268dc33ddf"
 senderBlockHash: "0xd69c6653e39d625ce19eb445563a55712666972d695e8ac904f988166b085d10"
 value: "14000000000000000000000"
+this needs updating
 
 web3.hls.getBlockNumber(chainAddress [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

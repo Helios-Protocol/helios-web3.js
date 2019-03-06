@@ -17,6 +17,7 @@ var outputBlockCreationParamsFormatter = function(block_creation_params) {
 };
 
 var outputTransactionFormatter = function (tx){
+
     if(tx.blockNumber !== null)
         tx.blockNumber = utils.hexToNumber(tx.blockNumber);
     if(tx.transactionIndex !== null)
@@ -38,19 +39,23 @@ var outputTransactionFormatter = function (tx){
 
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
 
+    console.log("DEBUG");
+    console.log(tx.gasPrice);
+    console.log(tx.gasUsed);
     return tx;
 };
 
 var outputReceiveTransactionFormatter = function (tx){
+
     tx.remainingRefund = formatter.outputBigNumberFormatter(tx.remainingRefund);
     tx.value = formatter.outputBigNumberFormatter(tx.value);
     tx.txTypeId = utils.hexToNumber(tx.txTypeId);
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
     tx.isRefund = Boolean(parseInt(tx.isRefund));
     tx.from = utils.toChecksumAddress(tx.from);
-
     return tx
 };
+
 
 var outputRewardType1Formatter = function (reward){
     reward.amount = formatter.outputBigNumberFormatter(reward.amount);
@@ -166,5 +171,6 @@ module.exports = {
     outputBlockFormatter: outputBlockFormatter,
     outputHistoricalGas: outputHistoricalGas,
     outputTransactionFormatter: outputTransactionFormatter,
-    outputTransactionReceiptFormatter: outputTransactionReceiptFormatter
+    outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
+    outputReceiveTransactionFormatter: outputReceiveTransactionFormatter
 };
