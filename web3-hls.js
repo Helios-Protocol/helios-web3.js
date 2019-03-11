@@ -181,6 +181,10 @@ var Hls = function Hls() {
 
     var methods = [
         new Method({
+            name: 'ping',
+            call: 'hls_ping'
+        }),
+        new Method({
             name: 'test',
             call: 'hls_test'
         }),
