@@ -23,6 +23,13 @@ If you are building a application to run in the browser:
             web3
             heliosWeb3
 
+3)  Access Helios functions using:
+
+        .. code:: bash
+
+            web3.hls
+            heliosWeb3.hls
+
 If you would like to develop helios-web3:
 
 1)  Clone this repo
