@@ -243,6 +243,12 @@ var Hls = function Hls() {
             inputFormatter: [formatter.inputAddressFormatter],
             outputFormatter: hls_formatter.outputReceiveTransactionFormatter
         }),
+        new Method({
+            name: 'getFaucet',
+            call: 'hls_getFaucet',
+            params: 1,
+            inputFormatter: [formatter.inputAddressFormatter]
+        }),
 
     ];
 
