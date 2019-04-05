@@ -7,12 +7,15 @@ This is web3.js for Helios Protocol. It is currently under active development.
 How to use
 ----------
 If you are building an application in nodejs:
+
     .. code:: bash
 
         $ npm install helios-web3
 
 If you are building a application to run in the browser:
+
 1)  Copy the compiled browser file from the dist directory, and then include it into your html file normally
+
 2)  Access web3 from within your javascript using either of the window variables:
         .. code:: bash
 
@@ -20,6 +23,7 @@ If you are building a application to run in the browser:
             heliosWeb3
 
 If you would like to develop helios-web3:
+
 1)  Clone this repo
 
         .. code:: bash
