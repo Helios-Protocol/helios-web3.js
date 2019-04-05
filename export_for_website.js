@@ -5,6 +5,9 @@ if (typeof window !== 'undefined') {
     if (typeof window.web3 === 'undefined'){
         window.web3 = web3;
     }
+    if (typeof window.web3 === 'undefined'){
+        window.heliosWeb3 = web3;
+    }
 }
 
 module.exports = web3;
