@@ -208,7 +208,8 @@ var Hls = function Hls() {
         new Method({
             name: 'getBlockNumber',
             call: 'hls_getBlockNumber',
-            params: 1,
+            params: 2,
+            inputFormatter: [formatter.inputAddressFormatter, hls_formatter.inputTimestampFormatter],
             outputFormatter: utils.hexToNumber
         }),
         new Method({

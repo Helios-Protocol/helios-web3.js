@@ -108,7 +108,10 @@ web3.hls.getBlockNumber(chainAddress [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Parameters**
-Same as web3.hls.getBlockNumber with the addition of chainAddress. chainAddress is the address of the chain that you would like the block number for.
+Same as web3.hls.getBlockNumber with the addition of chainAddress and beforeTimestamp.
+chainAddress is the address of the chain that you would like the block number for. if beforeTimestamp
+is specified, it will return the latest block number before the timestamp. It will produce an error if
+there are no matching blocks.
 
 **Returns**
 Same as web3.hls.getBlockNumber

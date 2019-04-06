@@ -165,6 +165,13 @@ var outputTransactionReceiptFormatter = function (receipt){
 };
 
 
+var inputTimestampFormatter = function(timestamp){
+    if (timestamp === undefined) {
+        return undefined;
+    }
+    return (utils.isHexStrict(timestamp)) ? ((_.isString(timestamp)) ? timestamp.toLowerCase() : timestamp) : utils.numberToHex(timestamp);
+}
+
 
 module.exports = {
     outputBlockCreationParamsFormatter: outputBlockCreationParamsFormatter,
@@ -172,5 +179,6 @@ module.exports = {
     outputHistoricalGas: outputHistoricalGas,
     outputTransactionFormatter: outputTransactionFormatter,
     outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
-    outputReceiveTransactionFormatter: outputReceiveTransactionFormatter
+    outputReceiveTransactionFormatter: outputReceiveTransactionFormatter,
+    inputTimestampFormatter: inputTimestampFormatter
 };
