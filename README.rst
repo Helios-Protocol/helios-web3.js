@@ -90,7 +90,6 @@ a chainAddress so that the node knows which chain the block lives on.
 "receiveTransactions"
 "rewardBundle"
 
-
 **example transactions**
 includes "gasUsed", unlike eth
 
@@ -103,6 +102,13 @@ from: "0xdb4ca426d53b59f60370274ffb19f2268dc33ddf"
 senderBlockHash: "0xd69c6653e39d625ce19eb445563a55712666972d695e8ac904f988166b085d10"
 value: "14000000000000000000000"
 this needs updating
+web3.hls.getNewestBlocks([numberOfBlocksToReturn = 10 (max 10), startIdx = 0, afterHash, chainAddress = None, includeTransactions = False] [, callback])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Gets a list of new blocks starting from start_idx and increasing the index to a max of numberOfBlocksToReturn, but it will stop when it hits the block with hash = afterHash.
+includeTransactions tells it whether to include transactions.
+Returns a list of the same kind of blocks as the getBlock function.
+Returns newest to oldest blocks.
+
 
 web3.hls.getBlockNumber(chainAddress [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

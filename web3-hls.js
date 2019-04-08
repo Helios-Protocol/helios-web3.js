@@ -47,6 +47,8 @@ var blockCall = function (args) {
     return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? "hls_getBlockByHash" : "hls_getBlockByNumber";
 };
 
+
+
 var transactionFromBlockCall = function (args) {
     return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'hls_getTransactionByBlockHashAndIndex' : 'hls_getTransactionByBlockNumberAndIndex';
 };
@@ -202,7 +204,14 @@ var Hls = function Hls() {
             name: 'getBlock',
             call: blockCall,
             params: 3,
-            inputFormatter: [formatter.inputBlockNumberFormatter, function (val) { return val; }, function (val) { return !!val; }],
+            inputFormatter: hls_formatter.inputBlockFormatter,
+            outputFormatter: hls_formatter.outputBlockFormatter
+        }),
+        new Method({
+            name: 'getNewestBlocks',
+            call: 'hls_getNewestBlocks',
+            params: 5,
+            inputFormatter: [formatter.inputBlockNumberFormatter, formatter.inputBlockNumberFormatter, hls_formatter.inputOptionalHexHashFormatter, hls_formatter.inputOptionalHexHashFormatter, function (val) { return !!val; }],
             outputFormatter: hls_formatter.outputBlockFormatter
         }),
         new Method({

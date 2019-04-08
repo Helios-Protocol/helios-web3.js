@@ -170,8 +170,19 @@ var inputTimestampFormatter = function(timestamp){
         return undefined;
     }
     return (utils.isHexStrict(timestamp)) ? ((_.isString(timestamp)) ? timestamp.toLowerCase() : timestamp) : utils.numberToHex(timestamp);
-}
+};
 
+var inputOptionalHexHashFormatter = function (value) {
+    if (_.isNull(value) || _.isUndefined(value)) {
+        return '0x';
+    }
+    return '0x' + value.toLowerCase().replace('0x','');
+};
+
+var InputBlockFormatter = function(args) {
+    return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? [formatter.inputBlockNumberFormatter, function (val) { return !!val; }] : [formatter.inputBlockNumberFormatter, function (val) { return val; }, function (val) { return !!val; }];
+
+};
 
 module.exports = {
     outputBlockCreationParamsFormatter: outputBlockCreationParamsFormatter,
@@ -180,5 +191,7 @@ module.exports = {
     outputTransactionFormatter: outputTransactionFormatter,
     outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
     outputReceiveTransactionFormatter: outputReceiveTransactionFormatter,
-    inputTimestampFormatter: inputTimestampFormatter
+    inputTimestampFormatter: inputTimestampFormatter,
+    inputOptionalHexHashFormatter: inputOptionalHexHashFormatter,
+    InputBlockFormatter: InputBlockFormatter
 };
