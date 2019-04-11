@@ -240,6 +240,12 @@ var Hls = function Hls() {
             outputFormatter: hls_formatter.outputTransactionReceiptFormatter
         }),
         new Method({
+            name: 'getTransactionByHash',
+            call: 'hls_getTransactionByHash',
+            params: 1,
+            outputFormatter: formatter.outputTransactionFormatter
+        }),
+        new Method({
             name: 'getBalance',
             call: 'hls_getBalance',
             params: 2,

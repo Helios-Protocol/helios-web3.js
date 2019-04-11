@@ -501,7 +501,9 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 console.log('test');
                 console.log(reward_bundle_hash);
                 console.log(total_reward_amount);
-                var timestamp = Math.floor(Date.now() / 1000)
+                var timestamp = Math.floor(Date.now() / 1000);
+                console.log("Signing block header with timestamp");
+                console.log(timestamp);
                 var header = {
                     chain_address: _this.privateKeyToAccount(privateKey).address,
                     parent_hash: block_creation_params.parent_hash,

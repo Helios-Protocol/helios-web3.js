@@ -72,6 +72,7 @@ a chainAddress so that the node knows which chain the block lives on.
 
 **Returns**
 "chainAddress"
+"sender" -> The address that signed the block.
 "extraData"
 "gasLimit"
 "gasUsed"
@@ -92,6 +93,7 @@ a chainAddress so that the node knows which chain the block lives on.
 
 **example transactions**
 includes "gasUsed", unlike eth
+includes "isReceive": false
 
 **example receiveTransactions**
 hash: "0xb52610ea9fefb6a2af025edc8e56d07c78d7446f1f0fe34005672ec3127ed965"
@@ -101,6 +103,8 @@ sendTransactionHash: "0xe5b564e507e45e24b789164aecb124f451ffc446c6f1c12a0a11ef06
 from: "0xdb4ca426d53b59f60370274ffb19f2268dc33ddf"
 senderBlockHash: "0xd69c6653e39d625ce19eb445563a55712666972d695e8ac904f988166b085d10"
 value: "14000000000000000000000"
+isReceive: true
+
 this needs updating
 web3.hls.getNewestBlocks([numberOfBlocksToReturn = 10 (max 10), startIdx = 0, afterHash, chainAddress = None, includeTransactions = False] [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,4 +137,7 @@ Same as with ethereum web3 except it returns 1 additional parameter:
 "is_receive"
 
 
+web3.hls.getTransactionByHash(tx_hash)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Gets the canonical transaction corresponding to the hash.
 
