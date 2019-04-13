@@ -43,11 +43,6 @@ var formatter = helpers.formatters;
 var hls_formatter = require('./web3-hls-formatters.js');
 
 
-var blockCall = function (args) {
-    return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? "hls_getBlockByHash" : "hls_getBlockByNumber";
-};
-
-
 
 var transactionFromBlockCall = function (args) {
     return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'hls_getTransactionByBlockHashAndIndex' : 'hls_getTransactionByBlockNumberAndIndex';
@@ -201,10 +196,17 @@ var Hls = function Hls() {
             params: 1
         }),
         new Method({
-            name: 'getBlock',
-            call: blockCall,
+            name: 'getBlockByHash',
+            call: 'hls_getBlockByHash',
+            params: 2,
+            inputFormatter: [formatter.inputBlockNumberFormatter, function (val) { return !!val }],
+            outputFormatter: hls_formatter.outputBlockFormatter
+        }),
+        new Method({
+            name: 'getBlockByNumber',
+            call: 'hls_getBlockByNumber',
             params: 3,
-            inputFormatter: hls_formatter.inputBlockFormatter,
+            inputFormatter: [function (val) { return  val }, function (val) { return  val }, function (val) { return !!val }],
             outputFormatter: hls_formatter.outputBlockFormatter
         }),
         new Method({
@@ -243,7 +245,7 @@ var Hls = function Hls() {
             name: 'getTransactionByHash',
             call: 'hls_getTransactionByHash',
             params: 1,
-            outputFormatter: formatter.outputTransactionFormatter
+            outputFormatter: hls_formatter.outputTransactionFormatter
         }),
         new Method({
             name: 'getBalance',
@@ -264,6 +266,12 @@ var Hls = function Hls() {
             call: 'hls_getFaucet',
             params: 1,
             inputFormatter: [formatter.inputAddressFormatter]
+        }),
+        new Method({
+            name: 'getConnectedNodes',
+            call: 'hls_getConnectedNodes',
+            params: 0,
+            outputFormatter: hls_formatter.outputConnectedNodesFormatter
         }),
 
     ];

@@ -63,12 +63,17 @@ You can see the documentation for that `here <https://web3js.readthedocs.io>`_.
 
 Here we will show documentation for Helios specific functionality.
 
-web3.hls.getBlock(blockHashOrBlockNumber [, chainAddress, returnTransactionObjects] [, callback])
+web3.hls.getBlock()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This has been removed. Use getBlockByNumber of getBlockByHash instead.
+
+
+web3.hls.getBlockByHash(blockHash [, returnTransactionObjects = false] [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Parameters**
-Same as web3.hls.getBlock with the addition of chainAddress. If blockHashorBlockNumber is a number, then you must provide
-a chainAddress so that the node knows which chain the block lives on.
+blockHash is the hex hash of the block. If returnTransactionsObjects is false, only the hashes of transactions are
+included in the block, otherwise the transaction objects are included in the block.
 
 **Returns**
 "chainAddress"
@@ -106,6 +111,13 @@ value: "14000000000000000000000"
 isReceive: true
 
 this needs updating
+
+web3.hls.getBlockByNumber(blockNumber, chainAddress [, returnTransactionObjects = false] [, callback])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Parameters**
+blockNumber is an integer, chainAddress is a hex encoded address of the chain on which the block lives.
+
 web3.hls.getNewestBlocks([numberOfBlocksToReturn = 10 (max 10), startIdx = 0, afterHash, chainAddress = None, includeTransactions = False] [, callback])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Gets a list of new blocks starting from start_idx and increasing the index to a max of numberOfBlocksToReturn, but it will stop when it hits the block with hash = afterHash.
