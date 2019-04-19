@@ -56,12 +56,18 @@ var outputSendTransactionFormatter = function (tx){
 var outputReceiveTransactionFormatter = function (tx){
     tx.remainingRefund = formatter.outputBigNumberFormatter(tx.remainingRefund);
     tx.value = formatter.outputBigNumberFormatter(tx.value);
-    tx.txTypeId = utils.hexToNumber(tx.txTypeId);
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
     tx.isRefund = Boolean(parseInt(tx.isRefund));
     tx.isReceive = Boolean(parseInt(tx.isReceive));
     tx.from = utils.toChecksumAddress(tx.from);
-    tx.transactionIndex = utils.hexToNumber(tx.transactionIndex);
+    if(tx.transactionIndex !== undefined) {
+        tx.transactionIndex = utils.hexToNumber(tx.transactionIndex);
+    }else{
+        tx.transactionIndex = null;
+    }
+    if(tx.blockHash === undefined) {
+        tx.blockHash = null;
+    }
     tx.gasPrice = formatter.outputBigNumberFormatter(tx.gasPrice);
     return tx
 };

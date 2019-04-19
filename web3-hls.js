@@ -229,12 +229,7 @@ var Hls = function Hls() {
             params: 0,
             outputFormatter: utils.hexToNumber
         }),
-        new Method({
-            name: 'getHistoricalGasPrice',
-            call: 'hls_getHistoricalGasPrice',
-            params: 0,
-            outputFormatter: hls_formatter.outputHistoricalGas
-        }),
+
         new Method({
             name: 'getTransactionReceipt',
             call: 'hls_getTransactionReceipt',
@@ -272,6 +267,25 @@ var Hls = function Hls() {
             call: 'hls_getConnectedNodes',
             params: 0,
             outputFormatter: hls_formatter.outputConnectedNodesFormatter
+        }),
+
+        new Method({
+            name: 'getHistoricalGasPrice',
+            call: 'hls_getHistoricalGasPrice',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
+        }),
+        new Method({
+            name: 'getApproximateHistoricalNetworkTPCCapability',
+            call: 'hls_getApproximateHistoricalNetworkTPCCapability',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
+        }),
+        new Method({
+            name: 'getApproximateHistoricalTPC',
+            call: 'hls_getApproximateHistoricalTPC',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
         }),
 
     ];
