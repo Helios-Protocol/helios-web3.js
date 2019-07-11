@@ -66042,7 +66042,9 @@ Accounts.prototype.signTransaction = function signTransaction(tx, privateKey, ca
         if (isNot(args[0]) || isNot(args[1]) || isNot(args[2])) {
             throw new Error('One of the values "chainId", "gasPrice", or "nonce" couldn\'t be fetched: '+ JSON.stringify(args));
         }
-        return signed(_.extend(tx, {chainId: args[0], gasPrice: args[1], nonce: args[2]}));
+        return signed(_.extend(tx, {chainId: args[0], gasPrice: args[1], nonce: args[2]}))
+    }).catch(function(error){
+        return Promise.reject(error);
     });
 };
 
@@ -66160,12 +66162,15 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
 
                     signed_transactions.push(signed_tx);
                     itemsProcessed++;
-                    if(itemsProcessed == transactions.length){
+                    if(itemsProcessed === transactions.length){
                         resolve(signed_transactions);
                     }
                  })
+                .catch(function(error){
+                    reject(error);
+                });
             })
-            if(itemsProcessed == transactions.length){
+            if(itemsProcessed === transactions.length){
                 resolve(signed_transactions);
             }
 
@@ -66212,6 +66217,9 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 var hash = Hash.keccak256(RLP.encode(parts_to_encode));
                 resolve(hash);
             })
+            .catch(function(error){
+                reject(error)
+            });
         })
      }
 
@@ -66273,10 +66281,9 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 var send_tx_root = args[0];
                 var receive_tx_root = args[1];
                 var reward_bundle_hash = args[2];
-                console.log('test');
-                console.log(reward_bundle_hash);
-                console.log(total_reward_amount);
-                var timestamp = Math.floor(Date.now() / 1000)
+                var timestamp = Math.floor(Date.now() / 1000);
+                console.log("Signing block header with timestamp");
+                console.log(timestamp);
                 var header = {
                     chain_address: _this.privateKeyToAccount(privateKey).address,
                     parent_hash: block_creation_params.parent_hash,
@@ -66322,9 +66329,15 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                     return result;
 
                 });
-            });
+            })
+            .catch(function(error){
+                return Promise.reject(error);
+            })
         });
-    });
+    })
+    .catch(function(error){
+        return Promise.reject(error);
+    })
 
 };
 
@@ -66660,7 +66673,17 @@ var outputBlockCreationParamsFormatter = function(block_creation_params) {
     return block_creation_params;
 };
 
-var outputTransactionFormatter = function (tx){
+var outputTransactionFormatter = function (tx) {
+    var isReceive = Boolean(parseInt(tx.isReceive));
+    if(isReceive){
+        tx = outputReceiveTransactionFormatter(tx)
+    }else{
+        tx = outputSendTransactionFormatter(tx)
+    }
+    return tx;
+};
+
+var outputSendTransactionFormatter = function (tx){
 
     if(tx.blockNumber !== null)
         tx.blockNumber = utils.hexToNumber(tx.blockNumber);
@@ -66682,21 +66705,27 @@ var outputTransactionFormatter = function (tx){
     }
 
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
+    tx.isReceive = Boolean(parseInt(tx.isReceive));
 
-    console.log("DEBUG");
-    console.log(tx.gasPrice);
-    console.log(tx.gasUsed);
     return tx;
 };
 
 var outputReceiveTransactionFormatter = function (tx){
-
     tx.remainingRefund = formatter.outputBigNumberFormatter(tx.remainingRefund);
     tx.value = formatter.outputBigNumberFormatter(tx.value);
-    tx.txTypeId = utils.hexToNumber(tx.txTypeId);
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
     tx.isRefund = Boolean(parseInt(tx.isRefund));
+    tx.isReceive = Boolean(parseInt(tx.isReceive));
     tx.from = utils.toChecksumAddress(tx.from);
+    if(tx.transactionIndex !== undefined) {
+        tx.transactionIndex = utils.hexToNumber(tx.transactionIndex);
+    }else{
+        tx.transactionIndex = null;
+    }
+    if(tx.blockHash === undefined) {
+        tx.blockHash = null;
+    }
+    tx.gasPrice = formatter.outputBigNumberFormatter(tx.gasPrice);
     return tx
 };
 
@@ -66704,14 +66733,16 @@ var outputReceiveTransactionFormatter = function (tx){
 var outputRewardType1Formatter = function (reward){
     reward.amount = formatter.outputBigNumberFormatter(reward.amount);
     return reward
-}
+};
 
 var outputRewardStakingScoreFormatter = function (score){
     score.recipientNodeWalletAddress = utils.toChecksumAddress(score.recipientNodeWalletAddress);
-    score.since_block_number = utils.hexToNumber(score.since_block_number);
+    score.sinceBlockNumber = utils.hexToNumber(score.sinceBlockNumber);
     score.timestamp = utils.hexToNumber(score.timestamp);
+    score.score = utils.hexToNumber(score.score);
+    score.sender = utils.toChecksumAddress(score.sender);
     return score
-}
+};
 
 var outputRewardType2Formatter = function (reward){
     reward.amount = formatter.outputBigNumberFormatter(reward.amount);
@@ -66724,17 +66755,19 @@ var outputRewardType2Formatter = function (reward){
     }
     return reward
 
-}
+};
 
 var outputRewardBundleFormatter = function (bundle){
 
     bundle.rewardType1 = outputRewardType1Formatter(bundle.rewardType1)
     bundle.rewardType2 = outputRewardType2Formatter(bundle.rewardType2)
+    bundle.isReward = Boolean(parseInt(bundle.isReward));
     return bundle
 };
 
 var outputBlockFormatter = function(block) {
     block.chainAddress = utils.toChecksumAddress(block.chainAddress);
+    block.sender = utils.toChecksumAddress(block.sender);
     block.accountBalance = formatter.outputBigNumberFormatter(block.accountBalance);
 
 
@@ -66753,15 +66786,21 @@ var outputBlockFormatter = function(block) {
 
     if (_.isArray(block.transactions)) {
         block.transactions = block.transactions.map(function(item) {
-            if(!_.isString(item))
+            if(!_.isString(item)) {
                 return outputTransactionFormatter(item);
+            }else{
+                return item;
+            }
         });
     }
 
     if (_.isArray(block.receiveTransactions)) {
         block.receiveTransactions = block.receiveTransactions.map(function(item) {
-            if(!_.isString(item))
+            if(!_.isString(item)) {
                 return outputReceiveTransactionFormatter(item);
+            }else{
+                return item;
+            }
         });
     }
 
@@ -66809,6 +66848,35 @@ var outputTransactionReceiptFormatter = function (receipt){
 };
 
 
+var inputTimestampFormatter = function(timestamp){
+    if (timestamp === undefined) {
+        return undefined;
+    }
+    return (utils.isHexStrict(timestamp)) ? ((_.isString(timestamp)) ? timestamp.toLowerCase() : timestamp) : utils.numberToHex(timestamp);
+};
+
+var inputOptionalHexHashFormatter = function (value) {
+    if (_.isNull(value) || _.isUndefined(value)) {
+        return '0x';
+    }
+    return '0x' + value.toLowerCase().replace('0x','');
+};
+
+var InputBlockFormatter = function(args) {
+    var toReturn = (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? [function (val) { return val; }, function (val) { return !!val; }] : [formatter.inputBlockNumberFormatter, function (val) { return val; }, function (val) { return !!val; }];
+};
+
+var outputConnectedNodesFormatter = function(connectedNode){
+    connectedNode.url = utils.hexToUtf8(connectedNode.url);
+    connectedNode.ipAddress = utils.hexToUtf8(connectedNode.ipAddress);
+    connectedNode.udpPort = utils.hexToNumber(connectedNode.udpPort);
+    connectedNode.tcpPort = utils.hexToNumber(connectedNode.tcpPort);
+    connectedNode.stake = formatter.outputBigNumberFormatter(connectedNode.stake);
+    connectedNode.requestsSent = utils.hexToNumber(connectedNode.requestsSent);
+    connectedNode.failedRequests = utils.hexToNumber(connectedNode.failedRequests);
+    connectedNode.averageResponseTime = utils.hexToNumber(connectedNode.averageResponseTime);
+    return connectedNode;
+};
 
 module.exports = {
     outputBlockCreationParamsFormatter: outputBlockCreationParamsFormatter,
@@ -66816,7 +66884,11 @@ module.exports = {
     outputHistoricalGas: outputHistoricalGas,
     outputTransactionFormatter: outputTransactionFormatter,
     outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
-    outputReceiveTransactionFormatter: outputReceiveTransactionFormatter
+    outputReceiveTransactionFormatter: outputReceiveTransactionFormatter,
+    inputTimestampFormatter: inputTimestampFormatter,
+    inputOptionalHexHashFormatter: inputOptionalHexHashFormatter,
+    InputBlockFormatter: InputBlockFormatter,
+    outputConnectedNodesFormatter: outputConnectedNodesFormatter
 };
 },{"underscore":453,"web3-core-helpers":467,"web3-eth-iban":498,"web3-utils":513}],534:[function(require,module,exports){
  
@@ -66864,9 +66936,6 @@ var formatter = helpers.formatters;
 var hls_formatter = require('./web3-hls-formatters.js');
 
 
-var blockCall = function (args) {
-    return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? "hls_getBlockByHash" : "hls_getBlockByNumber";
-};
 
 var transactionFromBlockCall = function (args) {
     return (_.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'hls_getTransactionByBlockHashAndIndex' : 'hls_getTransactionByBlockNumberAndIndex';
@@ -67006,10 +67075,6 @@ var Hls = function Hls() {
             call: 'hls_ping'
         }),
         new Method({
-            name: 'test',
-            call: 'hls_test'
-        }),
-        new Method({
             name: 'getProtocolVersion',
             call: 'eth_protocolVersion',
             params: 0
@@ -67020,16 +67085,31 @@ var Hls = function Hls() {
             params: 1
         }),
         new Method({
-            name: 'getBlock',
-            call: blockCall,
+            name: 'getBlockByHash',
+            call: 'hls_getBlockByHash',
+            params: 2,
+            inputFormatter: [formatter.inputBlockNumberFormatter, function (val) { return !!val }],
+            outputFormatter: hls_formatter.outputBlockFormatter
+        }),
+        new Method({
+            name: 'getBlockByNumber',
+            call: 'hls_getBlockByNumber',
             params: 3,
-            inputFormatter: [formatter.inputBlockNumberFormatter, function (val) { return val; }, function (val) { return !!val; }],
+            inputFormatter: [function (val) { return  val }, function (val) { return  val }, function (val) { return !!val }],
+            outputFormatter: hls_formatter.outputBlockFormatter
+        }),
+        new Method({
+            name: 'getNewestBlocks',
+            call: 'hls_getNewestBlocks',
+            params: 5,
+            inputFormatter: [formatter.inputBlockNumberFormatter, formatter.inputBlockNumberFormatter, hls_formatter.inputOptionalHexHashFormatter, hls_formatter.inputOptionalHexHashFormatter, function (val) { return !!val; }],
             outputFormatter: hls_formatter.outputBlockFormatter
         }),
         new Method({
             name: 'getBlockNumber',
             call: 'hls_getBlockNumber',
-            params: 1,
+            params: 2,
+            inputFormatter: [formatter.inputAddressFormatter, hls_formatter.inputTimestampFormatter],
             outputFormatter: utils.hexToNumber
         }),
         new Method({
@@ -67038,17 +67118,18 @@ var Hls = function Hls() {
             params: 0,
             outputFormatter: utils.hexToNumber
         }),
-        new Method({
-            name: 'getHistoricalGasPrice',
-            call: 'hls_getHistoricalGasPrice',
-            params: 0,
-            outputFormatter: hls_formatter.outputHistoricalGas
-        }),
+
         new Method({
             name: 'getTransactionReceipt',
             call: 'hls_getTransactionReceipt',
             params: 1,
             outputFormatter: hls_formatter.outputTransactionReceiptFormatter
+        }),
+        new Method({
+            name: 'getTransactionByHash',
+            call: 'hls_getTransactionByHash',
+            params: 1,
+            outputFormatter: hls_formatter.outputTransactionFormatter
         }),
         new Method({
             name: 'getBalance',
@@ -67069,6 +67150,31 @@ var Hls = function Hls() {
             call: 'hls_getFaucet',
             params: 1,
             inputFormatter: [formatter.inputAddressFormatter]
+        }),
+        new Method({
+            name: 'getConnectedNodes',
+            call: 'hls_getConnectedNodes',
+            params: 0,
+            outputFormatter: hls_formatter.outputConnectedNodesFormatter
+        }),
+
+        new Method({
+            name: 'getHistoricalGasPrice',
+            call: 'hls_getHistoricalGasPrice',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
+        }),
+        new Method({
+            name: 'getApproximateHistoricalNetworkTPCCapability',
+            call: 'hls_getApproximateHistoricalNetworkTPCCapability',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
+        }),
+        new Method({
+            name: 'getApproximateHistoricalTPC',
+            call: 'hls_getApproximateHistoricalTPC',
+            params: 0,
+            outputFormatter: hls_formatter.outputHistoricalGas
         }),
 
     ];
@@ -67114,7 +67220,12 @@ Hls.prototype.sendTransaction = function sendTransaction(tx) {
 
         return Promise.reject(error);
     }
-    var account = getAccountFromWallet(tx.from, _this.accounts);
+    try{
+        var account = getAccountFromWallet(tx.from, _this.accounts);
+    }catch(error){
+        var err = new Error('Error loading account from wallet:' +error);
+        return Promise.reject(err);
+    }
     if (account && account.privateKey) {
 
         return Promise.all([
@@ -67150,17 +67261,23 @@ Hls.prototype.sendTransactions = function sendTransactions(txs) {
 
     //make sure all the transactions are from the same wallet, and remove the from field
     var from = txs[0].from;
-    txs.forEach(function(tx, i){
+    for (var i = 0; i < txs.length; i++) {
+        var tx = txs[i];
         if(tx.from != from){
             error = new Error('When sending multiple transactions at once, they must be from the same wallet');
 
             return Promise.reject(error);
         }
         txs[i] = _.omit(txs[i], 'from');
-    })
+    }
 
 
-    var account = getAccountFromWallet(from, _this.accounts);
+    try {
+        var account = getAccountFromWallet(from, _this.accounts);
+    }catch(error){
+        var err = new Error('Error loading account from wallet:' +error);
+        return Promise.reject(err);
+    }
     if (account && account.privateKey) {
 
         return Promise.all([

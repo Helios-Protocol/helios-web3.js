@@ -267,7 +267,9 @@ Accounts.prototype.signTransaction = function signTransaction(tx, privateKey, ca
         if (isNot(args[0]) || isNot(args[1]) || isNot(args[2])) {
             throw new Error('One of the values "chainId", "gasPrice", or "nonce" couldn\'t be fetched: '+ JSON.stringify(args));
         }
-        return signed(_.extend(tx, {chainId: args[0], gasPrice: args[1], nonce: args[2]}));
+        return signed(_.extend(tx, {chainId: args[0], gasPrice: args[1], nonce: args[2]}))
+    }).catch(function(error){
+        return Promise.reject(error);
     });
 };
 
@@ -385,12 +387,15 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
 
                     signed_transactions.push(signed_tx);
                     itemsProcessed++;
-                    if(itemsProcessed == transactions.length){
+                    if(itemsProcessed === transactions.length){
                         resolve(signed_transactions);
                     }
                  })
+                .catch(function(error){
+                    reject(error);
+                });
             })
-            if(itemsProcessed == transactions.length){
+            if(itemsProcessed === transactions.length){
                 resolve(signed_transactions);
             }
 
@@ -437,6 +442,9 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 var hash = Hash.keccak256(RLP.encode(parts_to_encode));
                 resolve(hash);
             })
+            .catch(function(error){
+                reject(error)
+            });
         })
      }
 
@@ -498,9 +506,6 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                 var send_tx_root = args[0];
                 var receive_tx_root = args[1];
                 var reward_bundle_hash = args[2];
-                console.log('test');
-                console.log(reward_bundle_hash);
-                console.log(total_reward_amount);
                 var timestamp = Math.floor(Date.now() / 1000);
                 console.log("Signing block header with timestamp");
                 console.log(timestamp);
@@ -549,9 +554,15 @@ Accounts.prototype.signBlock = function signBlock(txs, privateKey, callback) {
                     return result;
 
                 });
-            });
+            })
+            .catch(function(error){
+                return Promise.reject(error);
+            })
         });
-    });
+    })
+    .catch(function(error){
+        return Promise.reject(error);
+    })
 
 };
 

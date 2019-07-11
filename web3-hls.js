@@ -182,10 +182,6 @@ var Hls = function Hls() {
             call: 'hls_ping'
         }),
         new Method({
-            name: 'test',
-            call: 'hls_test'
-        }),
-        new Method({
             name: 'getProtocolVersion',
             call: 'eth_protocolVersion',
             params: 0
@@ -331,7 +327,12 @@ Hls.prototype.sendTransaction = function sendTransaction(tx) {
 
         return Promise.reject(error);
     }
-    var account = getAccountFromWallet(tx.from, _this.accounts);
+    try{
+        var account = getAccountFromWallet(tx.from, _this.accounts);
+    }catch(error){
+        var err = new Error('Error loading account from wallet:' +error);
+        return Promise.reject(err);
+    }
     if (account && account.privateKey) {
 
         return Promise.all([
@@ -367,17 +368,23 @@ Hls.prototype.sendTransactions = function sendTransactions(txs) {
 
     //make sure all the transactions are from the same wallet, and remove the from field
     var from = txs[0].from;
-    txs.forEach(function(tx, i){
+    for (var i = 0; i < txs.length; i++) {
+        var tx = txs[i];
         if(tx.from != from){
             error = new Error('When sending multiple transactions at once, they must be from the same wallet');
 
             return Promise.reject(error);
         }
         txs[i] = _.omit(txs[i], 'from');
-    })
+    }
 
 
-    var account = getAccountFromWallet(from, _this.accounts);
+    try {
+        var account = getAccountFromWallet(from, _this.accounts);
+    }catch(error){
+        var err = new Error('Error loading account from wallet:' +error);
+        return Promise.reject(err);
+    }
     if (account && account.privateKey) {
 
         return Promise.all([
