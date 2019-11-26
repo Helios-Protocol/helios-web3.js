@@ -50,6 +50,35 @@ var outputSendTransactionFormatter = function (tx){
     tx.gasUsed = formatter.outputBigNumberFormatter(tx.gasUsed);
     tx.isReceive = Boolean(parseInt(tx.isReceive));
 
+    // Photon fork
+    if(tx.caller && utils.isAddress(tx.caller)){
+        tx.caller = utils.toChecksumAddress(tx.caller);
+    } else {
+        tx.caller = null; // set to `null` if invalid address
+    }
+
+    if(tx.origin && utils.isAddress(tx.origin)){
+        tx.origin = utils.toChecksumAddress(tx.origin);
+    } else {
+        tx.origin = null; // set to `null` if invalid address
+    }
+
+    if(tx.codeAddress && utils.isAddress(tx.codeAddress)){
+        tx.codeAddress = utils.toChecksumAddress(tx.codeAddress);
+    } else {
+        tx.codeAddress = null; // set to `null` if invalid address
+    }
+
+    if(tx.createAddress && utils.isAddress(tx.createAddress)){
+        tx.createAddress = utils.toChecksumAddress(tx.createAddress);
+    } else {
+        tx.createAddress = null; // set to `null` if invalid address
+    }
+
+    if(tx.executeOnSend) {
+        tx.executeOnSend = Boolean(parseInt(tx.executeOnSend));
+    }
+
     return tx;
 };
 
