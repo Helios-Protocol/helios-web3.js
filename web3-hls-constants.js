@@ -7,7 +7,7 @@ var getPhotonTimestamp = function (networkId) {
         return 9566516221;
     }else if(parseInt(networkId) === 42){
         // Hypothesis Testnet
-        return 9574737165;
+        return 1574813354;
     }
 
 };
