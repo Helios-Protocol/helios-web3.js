@@ -1,6 +1,6 @@
 {
   "name": "helios-web3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Web3.js extended for use with heliosprotocol",
   "main": "index.js",
   "dependencies": {
